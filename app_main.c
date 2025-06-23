@@ -7,9 +7,9 @@
 #include <unistd.h>        // sleep()
 
 // Definições da fila de mensagens
-#define QUEUE_NAME "/my_queue"     // Nome da fila POSIX (precisa começar com '/')
-#define MAX_MSG_SIZE 32
-#define QUEUE_SIZE 4
+#define QUEUE_NAME "/my_queue"  // Nome da fila POSIX (obrigatoriamente começa com '/')
+#define MAX_MSG_SIZE 32         // Tamanho máximo de cada mensagem
+#define QUEUE_SIZE 4            // Máximo de mensagens na fila
 
 // Semáforo global usado para sincronizar produtor e consumidor
 sem_t sem;
@@ -36,6 +36,7 @@ void *producer_thread(void *arg)
         pthread_exit(NULL);
     }
 
+    // Loop infinito para enviar mensagens
     while (1) 
     {
         snprintf(msg, MAX_MSG_SIZE, "Mensagem número: %d", count++);
@@ -56,12 +57,14 @@ void *consumer_thread(void *arg)
 
     printf("[Consumidor] Thread iniciada\n");
 
+    // Abre a fila de mensagens para leitura
     mq = mq_open(QUEUE_NAME, O_RDWR);
     if (mq == (mqd_t)-1) {
         perror("[Consumidor] Erro ao abrir a fila");
         pthread_exit(NULL);
     }
 
+    // Loop infinito para receber mensagens
     while (1) 
     {
         sem_wait(&sem);
